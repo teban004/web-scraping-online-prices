@@ -22,6 +22,11 @@ print()
 
 try:
     cnx = mysql.connector.connect(user=cfg.mysql["user"], password=cfg.mysql["passwd"], host=cfg.mysql["host"], database=cfg.mysql["db"])
+    print("The connection to the database has been established.")
+    mycursor = cnx.cursor()
+    sql = "INSERT INTO `price_history` (`product_id`, `text`) VALUES (1, `", priceSpan.text, "`);"
+    cnx.close()
+    print("The information has been written in the database.")
 except mysql.connector.errors.InterfaceError as err:
     print("Not possible to connect to the database.")
 
