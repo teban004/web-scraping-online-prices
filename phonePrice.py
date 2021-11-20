@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import mysql.connector
 import pricesConfig as cfg
+import htmlentities
 
 #get the data from the website
 URL = 'https://www.apple.com/ca/iphone-se/'
@@ -23,7 +24,7 @@ try:
     #print("The connection to the database has been established.")
     mycursor = cnx.cursor()
     sql = "INSERT INTO `price_history` (`product_id`, `text`) VALUES (%s, %s);"
-    val = (1, priceSpan.text)
+    val = (1, htmlentities.encode(priceSpan.text))
     #print("Executing the query:\n",sql)
     mycursor.execute(sql, val)
     cnx.commit()
