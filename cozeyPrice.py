@@ -1,5 +1,4 @@
 import requests
-from bs4 import BeautifulSoup
 import mysql.connector
 import pricesConfig as cfg
 import htmlentities
@@ -10,17 +9,16 @@ data = requests.get(URL)
 
 #print("The response from", URL, "is", data.status_code)
 
-#load data into bs4
-soup = BeautifulSoup(data.content, 'html.parser')
-
 #get data by getting the span element inside div with class hero-description-group
-data =[]
-pageBody = soup.find('body').text
-pricePosition = pageBody.find("navy-blue-2-seat-arms-normal-with-ottoman")
-priceText = pageBody[pricePosition:pricePosition+200]
-priceStartPosition = priceText.find("{") + 1
-priceEndPosition = priceText.find("}")
-priceText = priceText[priceStartPosition:priceEndPosition]
+pageBody = data.text
+#print(pageBody)
+pricePosition = pageBody.find('"navy-blue-2-seat-arms-normal-with-ottoman"')
+rawText = pageBody[pricePosition:pricePosition+100]
+#print(rawText)
+priceStartPosition = 0
+priceEndPosition = rawText.find("}") + 1
+#print("priceStartPosition;",priceStartPosition,"priceEndPosition",priceEndPosition)
+priceText = rawText[priceStartPosition : priceEndPosition].replace('"', '')
 #print(priceText)
 
 try:
@@ -30,6 +28,7 @@ try:
     sql = "INSERT INTO `price_history` (`product_id`, `text`) VALUES (%s, %s);"
     val = (2, htmlentities.encode(priceText))
     #print("Executing the query:\n",sql)
+    #print("Value: ",htmlentities.encode(priceText))
     mycursor.execute(sql, val)
     cnx.commit()
     cnx.close()

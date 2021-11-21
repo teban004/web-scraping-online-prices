@@ -10,7 +10,7 @@
             font-family: Arial, Helvetica, sans-serif;
             border-collapse: collapse;
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
             }
             
             #prices td, #prices th {
@@ -47,32 +47,43 @@
         die("Connection failed: " . $conn->connect_error);
     }
 
-    $sql = "SELECT * FROM `price_history` WHERE `product_id`=1 ORDER BY `registered_time` DESC LIMIT 0, 1000;";
-    $result = $conn->query($sql);
-
-    echo "<p>Total records fetched: ". $result->num_rows . "</p>";
-    if( $result->num_rows > 0) {
-        $prices = array();
-        $update_time = null;
-        while( $row = $result->fetch_assoc()) {
-            if( array_key_exists($row['text'], $prices)) // check if the text exists in the prices array
-                $prices[$row['text']] = $prices[$row['text']] + 1;
-            else // if it doesn't exist, creates it initialized to 1
-                $prices[$row['text']] = 1;
-
-            if( empty($update_time) )
-                $update_time = $row['registered_time'];
-        }
+    $sql = "SELECT * FROM `products` ORDER BY `registered_time`;";
+    $productsResult = $conn->query($sql);
+    if( $productsResult->num_rows > 0) {
         
-        echo "<p>Last update: " . $update_time . "</p>";
-        echo "<table id='prices'> <tr> <th>Count</th><th>Price text</th></tr>";
-        foreach( $prices as $priceText => $count) {
-            echo "<tr><td>". $count. "</td><td>". $priceText . "</td></tr>";
+        while( $productData = $productsResult->fetch_assoc()) {
+            
+            $sql = "SELECT `price_history`.`text`, `price_history`.`registered_time`, `products`.`product_name` FROM `price_history` LEFT JOIN `products` ON `price_history`.`product_id` = `products`.`product_id` WHERE `price_history`.`product_id`=" . $productData['product_id'] . " ORDER BY `price_history`.`registered_time` DESC LIMIT 0, 1000;";
+            $result = $conn->query($sql);
+
+            echo "<p>Total records fetched for <b>".$productData['product_name']."</b>: ". $result->num_rows . "</p>";
+            if( $result->num_rows > 0) {
+                $prices = array();
+                $update_time = null;
+                while( $row = $result->fetch_assoc()) {
+                    if( array_key_exists($row['text'], $prices)) // check if the text exists in the prices array
+                        $prices[$row['text']] = $prices[$row['text']] + 1;
+                    else // if it doesn't exist, creates it initialized to 1
+                        $prices[$row['text']] = 1;
+
+                    if( empty($update_time) )
+                        $update_time = $row['registered_time'];
+                }
+                
+                echo "<p>Last update: " . $update_time . "</p>";
+                echo "<table id='prices'> <tr> <th>Count</th><th>Price text</th></tr>";
+                foreach( $prices as $priceText => $count) {
+                    echo "<tr><td>". $count. "</td><td>". $priceText . "</td></tr>";
+                }
+                echo "</table>";
+            }
+            else {
+                echo "0 results";
+            }
         }
-        echo "</table>";
     }
     else {
-        echo "0 results";
+        echo "There are no registered products to show.";
     }
     
     $conn->close();
