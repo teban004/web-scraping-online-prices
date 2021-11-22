@@ -10,7 +10,7 @@
             font-family: Arial, Helvetica, sans-serif;
             border-collapse: collapse;
             width: 100%;
-            max-width: 800px;
+            max-width: 1200px;
             }
             
             #prices td, #prices th {
@@ -25,7 +25,7 @@
             #prices th {
             padding-top: 12px;
             padding-bottom: 12px;
-            text-align: left;
+            text-align: center;
             background-color: #5b7a6f;
             color: white;
             }
@@ -58,23 +58,24 @@
 
             echo "<p>Total records fetched for <b>".$productData['product_name']."</b>: ". $result->num_rows . "</p>";
             if( $result->num_rows > 0) {
-                $prices = array();
-                $update_time = null;
+                $count = 0;
+                $priceText = null;
+                $registeredTime = null;
+                echo "<table id='prices'> <tr> <th>Count</th><th>Price text</th><th>Last update</th></tr>";
                 while( $row = $result->fetch_assoc()) {
-                    if( array_key_exists($row['text'], $prices)) // check if the text exists in the prices array
-                        $prices[$row['text']] = $prices[$row['text']] + 1;
-                    else // if it doesn't exist, creates it initialized to 1
-                        $prices[$row['text']] = 1;
-
-                    if( empty($update_time) )
-                        $update_time = $row['registered_time'];
+                    if( $row['text'] == $priceText ) {
+                        $count++;
+                    }
+                    else {
+                        if( $count>0 ) {
+                            echo "<tr><td>". $count. "</td><td>". $priceText . "</td><td>". $registeredTime . "</td></tr>";
+                        }
+                        $count = 1;
+                        $priceText = $row['text'];
+                        $registeredTime = $row['registered_time'];
+                    }
                 }
-                
-                echo "<p>Last update: " . $update_time . "</p>";
-                echo "<table id='prices'> <tr> <th>Count</th><th>Price text</th></tr>";
-                foreach( $prices as $priceText => $count) {
-                    echo "<tr><td>". $count. "</td><td>". $priceText . "</td></tr>";
-                }
+                echo "<tr><td>". $count. "</td><td>". $priceText . "</td><td>". $registeredTime . "</td></tr>";
                 echo "</table>";
             }
             else {
