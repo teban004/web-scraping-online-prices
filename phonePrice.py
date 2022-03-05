@@ -1,4 +1,3 @@
-import requests
 from bs4 import BeautifulSoup
 import mysql.connector
 import pricesConfig as cfg
@@ -19,7 +18,7 @@ driver.quit()
 data =[]
 priceDiv = soup.find('div', {'class': 'hero-description-group'})
 priceSpan = priceDiv.find("span")
-print(priceSpan.text)
+#print(priceSpan.text)
 
 try:
     cnx = mysql.connector.connect(user=cfg.mysql["user"], password=cfg.mysql["passwd"], host=cfg.mysql["host"], database=cfg.mysql["db"])
