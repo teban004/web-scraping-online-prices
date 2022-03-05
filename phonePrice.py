@@ -4,20 +4,22 @@ import mysql.connector
 import pricesConfig as cfg
 import htmlentities
 
+from selenium import webdriver
+
 #get the data from the website
 URL = 'https://www.apple.com/ca/iphone-se/'
-data = requests.get(URL)
-
-#print("The response from", URL, "is", data)
+driver = webdriver.Chrome('/snap/bin/chromium.chromedriver')
+driver.get(URL)
 
 #load data into bs4
-soup = BeautifulSoup(data.content, 'html.parser')
+soup = BeautifulSoup(driver.page_source, 'html.parser')
+driver.quit()
 
 #get data by getting the span element inside div with class hero-description-group
 data =[]
 priceDiv = soup.find('div', {'class': 'hero-description-group'})
 priceSpan = priceDiv.find("span")
-#print(priceSpan.text)
+print(priceSpan.text)
 
 try:
     cnx = mysql.connector.connect(user=cfg.mysql["user"], password=cfg.mysql["passwd"], host=cfg.mysql["host"], database=cfg.mysql["db"])
@@ -33,5 +35,3 @@ try:
 except mysql.connector.errors.InterfaceError as err:
     print("Not possible to connect to the database.")
  
-
-
